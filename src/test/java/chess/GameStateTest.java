@@ -23,8 +23,8 @@ public class GameStateTest {
     @Test
     public void testStartsEmpty() {
         // Make sure all the positions are empty
-        for (char col = Position.MIN_COLUMN; col <= Position.MAX_COLUMN; col++) {
-            for (int row = Position.MIN_ROW; row <= Position.MAX_ROW; row++) {
+        for (char col = Position.MIN_COLUMN_VALUE; col <= Position.MAX_COLUMN_VALUE; col++) {
+            for (int row = Position.MIN_ROW + 1; row <= Position.MAX_ROW + 1; row++) {
                 assertNull("All pieces should be empty", state.getPieceAt(String.valueOf(col) + row));
             }
         }

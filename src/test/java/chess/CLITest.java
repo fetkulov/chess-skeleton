@@ -57,8 +57,8 @@ public class CLITest {
         List<String> output = captureOutput();
 
         assertEquals("Should have had 6 calls to print strings", 6, output.size());
-        assertEquals("It should have printed the board first", 701, output.get(2).length());
-        assertEquals("It should have printed the board again", 701, output.get(4).length());
+        assertEquals("It should have printed the board first", 721, output.get(2).length());
+        assertEquals("It should have printed the board again", 721, output.get(4).length());
     }
 
     @Test
@@ -68,6 +68,23 @@ public class CLITest {
 
         assertEquals("Should have had 9 output calls", 9, output.size());
         assertEquals("It should have printed the board three times", output.get(2), output.get(4));
+    }
+
+    @Test
+    public void testMoveCommand() throws Exception {
+        runCliWithInput("new", "move e2 e3");
+        List<String> output = captureOutput();
+        assertEquals("It should have printed the board three times", output.get(2), output.get(4));
+        assertEquals("Should not contain pawn on e3", 536, output.get(4).indexOf('p'));
+        assertEquals("Should contain pawn on e3", 476, output.get(6).indexOf('p'));
+    }
+
+    @Test
+    public void testIncorrectMoveCommand() throws Exception {
+        runCliWithInput("new", "move e2 e8");
+        List<String> output = captureOutput();
+        assertEquals("It should have printed the board three times", output.get(2), output.get(4));
+        assertEquals("Should contain pawn on e3", "Incorrect command!", output.get(6));
     }
 
     private List<String> captureOutput() {

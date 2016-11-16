@@ -3,6 +3,7 @@ package chess;
 import chess.pieces.Piece;
 
 import java.io.*;
+import java.util.Set;
 
 /**
  * This class provides the basic CLI interface to the Chess game.
@@ -64,12 +65,33 @@ public class CLI {
                 } else if (input.equals("board")) {
                     writeOutput("Current Game:");
                 } else if (input.equals("list")) {
-                    writeOutput("====> List Is Not Implemented (yet) <====");
+                    showPossibleMoves(gameState);
                 } else if (input.startsWith("move")) {
-                    writeOutput("====> Move Is Not Implemented (yet) <====");
+                    makeMove(input);
                 } else {
                     writeOutput("I didn't understand that.  Type 'help' for a list of commands.");
                 }
+            }
+        }
+    }
+
+    private void showPossibleMoves(GameState gameState){
+        writeOutput("Possible moves:");
+        printPossibleMoves(gameState.getAllPossibleMoves());
+    }
+
+    private void makeMove(String input){
+        String[] commands =  input.split("\\s+");
+        if(commands.length <3){
+            writeOutput("Incorrect command!");
+        }else{
+            String from = commands[1];
+            String to = commands[2];
+            try{
+                gameState.makeMove(from, to);
+            }catch(IllegalArgumentException e){
+                // nice to write log
+                writeOutput("Incorrect command!");
             }
         }
     }
@@ -101,7 +123,7 @@ public class CLI {
         builder.append(NEWLINE);
 
         printColumnLabels(builder);
-        for (int i = Position.MAX_ROW; i >= Position.MIN_ROW; i--) {
+        for (int i = Position.MAX_ROW + 1; i >= Position.MIN_ROW + 1; i--) {
             printSeparator(builder);
             printSquares(i, builder);
         }
@@ -112,11 +134,19 @@ public class CLI {
         return builder.toString();
     }
 
+    private void printPossibleMoves(Set<Moves> allMoves){
+        StringBuilder builder = new StringBuilder();
+        builder.append(NEWLINE);
+        for (Moves moves : allMoves) {
+            builder.append(moves.toString());
+        }
+        writeOutput(builder.toString());
+    }
 
     private void printSquares(int rowLabel, StringBuilder builder) {
         builder.append(rowLabel);
 
-        for (char c = Position.MIN_COLUMN; c <= Position.MAX_COLUMN; c++) {
+        for (char c = Position.MIN_COLUMN_VALUE; c <= Position.MAX_COLUMN_VALUE; c++) {
             Piece piece = gameState.getPieceAt(String.valueOf(c) + rowLabel);
             char pieceChar = piece == null ? ' ' : piece.getIdentifier();
             builder.append(" | ").append(pieceChar);
@@ -130,7 +160,7 @@ public class CLI {
 
     private void printColumnLabels(StringBuilder builder) {
         builder.append("   ");
-        for (char c = Position.MIN_COLUMN; c <= Position.MAX_COLUMN; c++) {
+        for (char c = Position.MIN_COLUMN_VALUE; c <= Position.MAX_COLUMN_VALUE; c++) {
             builder.append(" ").append(c).append("  ");
         }
 

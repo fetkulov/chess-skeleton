@@ -13,14 +13,14 @@ public class PositionTest {
     public void testStringParsingConstructor() {
         Position pos = new Position("d5");
 
-        assertEquals("The column should be 'd'", 'd', pos.getColumn());
-        assertEquals("The row should be 5", 5, pos.getRow());
+        assertEquals("The column should be 'd'", 'd', pos.getColumnName());
+        assertEquals("The row should be 5", 5, pos.getRowName());
     }
 
     @Test
     public void testPositionEquality() {
-        Position one = new Position('a', 1);
-        Position other = new Position('a', 1);
+        Position one = new Position("a1");
+        Position other = new Position("a1");
 
         assertEquals("The positions should equal each other", one, other);
     }

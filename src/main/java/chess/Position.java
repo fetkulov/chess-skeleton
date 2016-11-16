@@ -1,15 +1,21 @@
 package chess;
 
+import org.apache.commons.lang.builder.*;
+
 /**
  * Describes a position on the Chess Board
  */
 public class Position {
-    public static final int MIN_ROW = 1;
-    public static final int MAX_ROW = 8;
-    public static final char MIN_COLUMN = 'a';
-    public static final char MAX_COLUMN = 'h';
+    public static final int A_POSITION = (int)'a';
+    public static final int MIN_ROW = 0;
+    public static final int MAX_ROW = 7;
+    public static final int MIN_COLUMN = 0;
+    public static final int MAX_COLUMN = 7;
+    public static final char MIN_COLUMN_VALUE = 'a';
+    public static final char MAX_COLUMN_VALUE = 'h';
+
     private int row;
-    private char column;
+    private int column;
 
     /**
      * Create a new position object
@@ -17,9 +23,22 @@ public class Position {
      * @param column The column
      * @param row The row
      */
-    public Position(char column, int row) {
+    public Position(int column, int row){
+
+        if (isOutOfBoard(column, row)) {
+            throw new IllegalArgumentException("Incorrect position!");
+        }
+
         this.row = row;
         this.column = column;
+    }
+
+
+    public static boolean isOutOfBoard(int column, int row) {
+        if( row > MAX_ROW || row < MIN_ROW|| column > MAX_COLUMN || column < MIN_COLUMN){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -27,42 +46,60 @@ public class Position {
      * @param colrow The column and row to use.  I.e. "a1", "h7", etc.
      */
     public Position(String colrow) {
-        this(colrow.toCharArray()[0], Character.digit(colrow.toCharArray()[1], 10));
+        this((int) (colrow.toCharArray()[0]) - A_POSITION, colrow.toCharArray()[1] - '1');
     }
 
     public int getRow() {
         return row;
     }
 
-    public char getColumn() {
+    public int getColumn() {
         return column;
     }
 
+    public char getRowName() {
+        return (char) (row + 1);
+    }
+
+    public String getColumnRow(){
+        return new StringBuilder().append((char) (column + A_POSITION)).append(row + 1).toString();
+    }
+
+    public char getColumnName() {
+        return (char) (column + A_POSITION);
+    }
+
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object obj) {
+        if (obj instanceof Position == false) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        final Position otherObject = (Position) obj;
 
-        Position position = (Position) o;
-
-        if (column != position.column) return false;
-
-        //noinspection RedundantIfStatement
-        if (row != position.row) return false;
-
-        return true;
+        return new EqualsBuilder()
+                .append(this.column, otherObject.column)
+                .append(this.row, otherObject.row)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = row;
-        result = 31 * result + (int) column;
-        return result;
+        return new HashCodeBuilder()
+                .append(this.row)
+                .append(this.column)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "" + column + row;
+        return new ToStringBuilder(this)
+                .append("row:", this.row)
+                .append(" column:", this.column)
+                .toString();
     }
 
 }

@@ -1,10 +1,11 @@
 package chess;
 
 
+import chess.behaviour.PieceBehaviour;
 import chess.pieces.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class that represents the current state of the game.  Basically, what pieces are in which positions on the
@@ -20,17 +21,25 @@ public class GameState {
     /**
      * A map of board positions to pieces at that position
      */
-    private Map<Position, Piece> positionToPieceMap;
+    private Piece[][] chessBoard;
 
     /**
      * Create the game state.
      */
     public GameState() {
-        positionToPieceMap = new HashMap<Position, Piece>();
+        chessBoard = new Piece[8][8];
     }
 
     public Player getCurrentPlayer() {
         return currentPlayer;
+    }
+
+    public Piece[][] getChessBoard() {
+        return chessBoard;
+    }
+
+    public void setChessBoard(Piece[][] chessBoard) {
+        this.chessBoard = chessBoard;
     }
 
     /**
@@ -74,8 +83,68 @@ public class GameState {
         placePiece(new Pawn(Player.Black), new Position("h7"));
     }
 
+    public Set<Moves> getAllPossibleMoves() {
+        Set<Moves> possibleMoves = new HashSet<>();
+        for (int c = Position.MIN_COLUMN; c <= Position.MAX_COLUMN; c++) {
+            for (int r = Position.MIN_ROW; r <= Position.MAX_ROW; r++) {
+                possibleMoves.addAll(possibleMovesFromCurrentPosition(c, r));
+            }
+
+        }
+        return possibleMoves;
+    }
+
+    private Set<Moves> possibleMovesFromCurrentPosition(int c, int r) {
+        Set<Moves> possibleMovesFromPosition = new HashSet<>();
+        Position currentPosition = new Position(c, r);
+        Piece piece = getPieceAtForCurrentPlayer(currentPosition);
+        if (piece != null) {
+            Moves movesForCurrentPiece = new Moves(currentPosition);
+            movesForCurrentPiece.addPossibleMoves(getMovesFromBehaviours(piece.getBehaviors(), currentPosition));
+            possibleMovesFromPosition.add(movesForCurrentPiece);
+        }
+        return possibleMovesFromPosition;
+    }
+
+    public void makeMove(String from, String to){
+
+        Position fromPosition = new Position(from);
+        Position toPosition = new Position(to);
+        Set<Moves> possibleMovesFromPosition = possibleMovesFromCurrentPosition(fromPosition.getColumn(), fromPosition.getRow());
+        Set<Position> positions = new HashSet<>();
+        for (Moves moves : possibleMovesFromPosition) {
+            positions.addAll(moves.getPossibleMoves());
+        }
+        if (!positions.isEmpty() && positions.contains(toPosition)) {
+            Piece piece = getPieceAtForCurrentPlayer(fromPosition);
+            chessBoard[fromPosition.getColumn()][fromPosition.getRow()] = null;
+            chessBoard[toPosition.getColumn()][toPosition.getRow()] = piece;
+            currentPlayer = Player.White.equals(currentPlayer) ? Player.Black : Player.White;
+        } else {
+            throw new IllegalArgumentException("incorrect 'from'/'to' position!");
+        }
+
+    }
+
+    private Piece getPieceAtForCurrentPlayer(Position position) {
+        Piece piece = getPieceAt(position);
+        if (piece == null) {
+            return null;
+        }
+        return currentPlayer.equals(piece.getOwner()) ? piece : null;
+    }
+
+    private Set<Position> getMovesFromBehaviours(Set<PieceBehaviour> pieceBehaviours, Position currentPosition) {
+        Set<Position> possibleMoves = new HashSet<>();
+        for (PieceBehaviour pieceBehaviour : pieceBehaviours) {
+            possibleMoves.addAll(pieceBehaviour.getAvailableMoves(chessBoard, currentPosition));
+        }
+        return possibleMoves;
+    }
+
     /**
      * Get the piece at the position specified by the String
+     *
      * @param colrow The string indication of position; i.e. "d5"
      * @return The piece at that position, or null if it does not exist.
      */
@@ -86,19 +155,21 @@ public class GameState {
 
     /**
      * Get the piece at a given position on the board
+     *
      * @param position The position to inquire about.
      * @return The piece at that position, or null if it does not exist.
      */
     public Piece getPieceAt(Position position) {
-        return positionToPieceMap.get(position);
+        return chessBoard[position.getColumn()][position.getRow()];
     }
 
     /**
      * Method to place a piece at a given position
-     * @param piece The piece to place
+     *
+     * @param piece    The piece to place
      * @param position The position
      */
     private void placePiece(Piece piece, Position position) {
-        positionToPieceMap.put(position, piece);
+        chessBoard[position.getColumn()][position.getRow()] = piece;
     }
 }
